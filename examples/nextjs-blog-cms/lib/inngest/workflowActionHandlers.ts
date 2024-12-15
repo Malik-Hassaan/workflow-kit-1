@@ -7,6 +7,13 @@ import { loadBlogPost } from "../loaders/blog-post";
 import { createClient } from "../supabase/server";
 import { actions } from "./workflowActions";
 import { inngest } from "./client";
+import { Resend } from 'resend';
+import { EmailTemplate } from '@/components/email-template';
+
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+
 
 // helper to ensure that each step of the workflow use
 //  the original content or current AI revision
@@ -193,26 +200,35 @@ export const actionsWithHandlers: EngineAction<typeof inngest>[] = [
     },
   },
   {
-    // Apply changes
+    // Send Emails
     ...actions[3],
     handler: async ({ event, step }) => {
-      const supabase = createClient();
+      const stepstart = await step.run("email-event-start", async () =>{
+        console.log(`Test Email Event `,event)
+        return {newdata:event.data};
+      } );
 
-      const blogPost = await step.run("load-blog-post", async () =>
-        loadBlogPost(event.data.id)
-      );
+  
+      // throw new Error(`Test Email Event Failed`);
+      return {newdata:event.data}; 
+      // // console.log("Recieved Blog Post New event ",{ event, step})
+      // const supabase = createClient();
 
-      await step.run("apply-ai-revision", async () => {
-        await supabase
-          .from("blog_posts")
-          .update({
-            markdown: blogPost.markdown_ai_revision,
-            markdown_ai_revision: null,
-            status: "published",
-          })
-          .eq("id", blogPost.id)
-          .select("*");
-      });
+      // const blogPost = await step.run("load-blog-post", async () =>
+      //   loadBlogPost(event.data.id)
+      // );
+
+      // await step.run("apply-ai-revision", async () => {
+      //   await supabase
+      //     .from("blog_posts")
+      //     .update({
+      //       markdown: blogPost.markdown_ai_revision,
+      //       markdown_ai_revision: null,
+      //       status: "published",
+      //     })
+      //     .eq("id", blogPost.id)
+      //     .select("*");
+      // });
     },
   },
   {
@@ -334,4 +350,136 @@ export const actionsWithHandlers: EngineAction<typeof inngest>[] = [
       });
     },
   },
+  {
+    ...actions[6],
+    handler: async ({ event, step }) => {
+      try {
+
+        let eventData = event;
+        console.log(` send_to_supabase_db recieved`,eventData)
+
+
+        const { data, error } = await resend.emails.send({
+          from: 'Acme <onboarding@resend.dev>',
+          to: "muhammadhassni2006@gmail.com",
+          subject: 'Default Subject',
+          react: EmailTemplate({ firstName: eventData.firstname, email: eventData.email }),
+        });
+        return data;
+
+      } catch (error) {
+        console.error("Error in handler:", error);
+      }
+    },
+  },
+  // {
+  //   ...actions[8],
+  //   handler: async ({ event, step }) => {
+  //     try {
+  //       console.log("Handler Invoked for add_product_to_shopify");
+    
+  //       const productUrl = event.data.productUrl;
+  //       if (!productUrl) {
+  //         throw new Error("Product URL is missing in event data.");
+  //       }
+    
+  //       console.log("Fetching product data from URL:", productUrl);
+    
+  //       const productData = await step.run("fetch-product-data", async () => {
+  //         const response = await fetch(productUrl, {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             "X-Shopify-Access-Token": "shptka_6c02c733bc4ad1808ae62b2913b5a1a2", 
+  //           },
+  //         });
+    
+  //         console.log("Fetch Response Status:", response.status);
+  //         console.log("Fetch Response Text:", await response.text());
+    
+  //         if (!response.ok) {
+  //           throw new Error(`Failed to fetch product data: ${response.statusText}`);
+  //         }
+    
+  //         return response.json();
+  //       });
+    
+  //       console.log("Fetched Product Data:", productData);
+    
+  //       const { title, body_html, ...rest } = productData;
+  //       const jsondata = JSON.stringify(rest);
+    
+  //       console.log("Prepared Data for Supabase:", { title, body_html, status: "added", jsondata });
+    
+  //       const supabase = createClient();
+  //       const { data: productdata, error } = await supabase
+  //         .from("shopify-product-data")
+  //         .insert({
+  //           title,
+  //           body_html,
+  //           status: "added",
+  //           jsondata,
+  //         })
+  //         .select("*")
+  //         .single();
+    
+  //       if (error) {
+  //         console.error("Supabase Insert Error:", error.message);
+  //         console.error("Supabase Full Error:", error);
+  //       } else {
+  //         console.log("Data Successfully Inserted Into Supabase:", productdata);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error in add_product_to_shopify handler:", error);
+  //     }
+  //   },
+    
+  // },
+  {
+    ...actions[7],
+    handler: async ({ event, step }) => {
+      try {
+        console.log("Handler Invoked for add_order_to_database", event);
+  
+        const supabase = createClient();
+  
+        const orderData = await step.run("insert-order-to-database", async () => {
+          const { data, error } = await supabase
+            .from("shopify-order-data")
+            .insert({
+              admin_graphql_api_id: event.data.admin_graphql_api_id,
+              title: event.data.title,
+              sku: event.data.sku,
+              amount: event.data.amount
+            })
+            .select("*")
+            .single();
+  
+          if (error) {
+            console.error("Supabase Insert Error:", error.message);
+            throw new Error(error.message); 
+          }
+  
+          return data;
+        });
+  
+        console.log("Data Successfully Inserted Into Supabase:", orderData);
+  
+      } catch (error) {
+        console.error("Error in add_product_to_database handler:", error);
+  
+        await step.run("handle-insert-failure", async () => {
+          console.error("Handling failure for event:", event);
+          
+        });
+      }
+    }
+  }
+  
+
+  
+
+
+
+
 ];

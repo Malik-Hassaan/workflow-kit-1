@@ -8,6 +8,7 @@ import { EditIcon } from "lucide-react";
 import { type Workflow } from "@/lib/supabase/types";
 
 import { Button } from "@/components/ui/button";
+import Dilog from "../../nextjs-blog-cms/components/Dialog/Dilog"
 import {
   Card,
   CardContent,
@@ -33,6 +34,7 @@ export const AutomationList = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Automations</h2>
+        <h3 className="text-sm border rounded-full  px-4 py-1  cursor-pointer"><Dilog/> </h3>
       </div>
       <div className="grid gap-6">
         {(data?.workflows || []).map((workflow) => {

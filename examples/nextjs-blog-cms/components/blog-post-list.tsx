@@ -25,7 +25,7 @@ export const BlogPostList = () => {
   const { data } = useSWR<{ blogPosts: BlogPost[] }>(
     "/api/blog-posts",
     fetcher,
-    { refreshInterval: 1000 }
+    { refreshInterval:30000 }
   );
 
   return (

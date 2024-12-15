@@ -25,6 +25,24 @@ export const actions: PublicEngineAction[] = [
     name: "Apply changes after approval",
     description: "Request approval for changes",
   },
+  // {
+  //   kind: "send_to_supabase_email",
+  //   name: "Send Email ",
+  //   description: "Send Email to a user",
+  //   inputs:[
+
+  //         {
+  //         title: "Email address",
+  //         type:{
+  //           title: "Email",
+  //           description: "User's email address",
+  //           required: true,          
+  //         }
+  //         fieldType: "text",
+          
+  //         }
+  //   ]
+  // }, 
   {
     kind: "apply_changes",
     name: "Apply changes",
@@ -40,4 +58,21 @@ export const actions: PublicEngineAction[] = [
     name: "Generate Twitter posts",
     description: "Generate Twitter posts",
   },
+  {
+    kind: "send_to_supabase_db",
+    name: "Send data to database ",
+    description: "Send Email to a user",
+  },
+  // {
+  //   kind: "add_product_to_shopify",
+  //   name: "Add Product to Shopify",
+  //   description: "Send Email to a user",
+  // },
+  {
+    kind: "order_created",
+    name: "Order created in shopify ",
+    description: "Send Email to a user",
+  },
+
+
 ];

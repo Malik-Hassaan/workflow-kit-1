@@ -51,7 +51,7 @@ export const AutomationEditor = ({ workflow }: { workflow: Workflow }) => {
         </CardHeader>
         <CardContent>
           <div className="h-svh max-h-[500px]">
-            <Provider
+            {/* <Provider
               key={workflowDraft?.id}
               workflow={workflowDraft?.workflow}
               trigger={{
@@ -66,11 +66,67 @@ export const AutomationEditor = ({ workflow }: { workflow: Workflow }) => {
                   workflow: updated,
                 });
               }}
+
+              
             >
               <Editor>
                 <Sidebar position="right" />
               </Editor>
-            </Provider>
+            </Provider> */}
+
+<Provider
+  key={workflowDraft?.id}
+  workflow={workflowDraft?.workflow}
+  trigger={{
+    event: {
+      name: workflowDraft.trigger,
+    },
+  }}
+  availableActions={actions}
+  onChange={async (updatedWorkflow) => {
+    updateWorkflowDraft({
+      ...workflowDraft,
+      workflow: updatedWorkflow,
+    });
+
+    
+    // const emailAction = updatedWorkflow.actions.find(
+    //   (action) => action.kind === "send_to_supabase_email"
+    // );
+
+    // if (emailAction) {
+  
+    //   try {
+    //     const response = await fetch('/api/send', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //       body: JSON.stringify({
+    //         firstName: "John",
+    //         email: "john.doe@example.com", 
+    //         subject: "Welcome Email",      
+    //       }),
+          
+    //     });
+
+    //     if (response.ok) {
+    //       const result = await response.json();
+    //       console.log("Email sent successfully:", result);
+    //     } else {
+    //       console.error("Failed to send email:", await response.text());
+    //     }
+    //   } catch (error) {
+    //     console.error("Error while sending email:", error);
+    //   }
+    // }
+  }}
+>
+  <Editor>
+    <Sidebar position="right" />
+  </Editor>
+</Provider>
+
           </div>
           <CardFooter className="flex justify-end align-bottom gap-4"></CardFooter>
         </CardContent>

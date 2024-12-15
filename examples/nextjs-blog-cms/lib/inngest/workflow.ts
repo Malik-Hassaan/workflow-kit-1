@@ -14,7 +14,15 @@ export default inngest.createFunction(
   // Triggers
   // - When a blog post is set to "review"
   // - When a blog post is published
-  [{ event: "blog-post.updated" }, { event: "blog-post.published" }],
+  [
+    { event: "blog-post.updated" }, { event: "blog-post.published" },
+    { event:"blog-post.new" }, 
+   { event:"blog-abc.neww" },
+   { event:"orders/create" },
+
+
+      
+  ],
   async ({ event, step }) => {
     // When `run` is called, the loader function is called with access to the event
     await workflowEngine.run({ event, step });
