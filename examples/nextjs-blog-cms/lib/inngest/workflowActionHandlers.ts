@@ -7,13 +7,11 @@ import { loadBlogPost } from "../loaders/blog-post";
 import { createClient } from "../supabase/server";
 import { actions } from "./workflowActions";
 import { inngest } from "./client";
-import { Resend } from 'resend';
-import { EmailTemplate } from '@/components/email-template';
+import { EmailTemplate } from "@/components/email-template";
 
+import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-
 
 // helper to ensure that each step of the workflow use
 //  the original content or current AI revision
